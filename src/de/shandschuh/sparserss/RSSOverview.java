@@ -66,8 +66,10 @@ import de.shandschuh.sparserss.provider.OPML;
 import de.shandschuh.sparserss.service.RefreshService;
 
 public class RSSOverview extends ListActivity {
+	public static RSSOverview INSTANCE;
+
 	private static final int DIALOG_ERROR_FEEDIMPORT = 3;
-	
+
 	private static final int DIALOG_ERROR_FEEDEXPORT = 4;
 	
 	private static final int DIALOG_ERROR_INVALIDIMPORTFILE = 5;
@@ -111,6 +113,7 @@ public class RSSOverview extends ListActivity {
     		setTheme(R.style.Theme_Light);
     	}
         super.onCreate(savedInstanceState);
+        INSTANCE = this;
 
     	if (notificationManager == null) {
         	notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -225,7 +228,7 @@ public class RSSOverview extends ListActivity {
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Strings.SETTINGS_REFRESHONPENENABLED, false)) {
         	new Thread() {
 				public void run() {
-					sendBroadcast(new Intent(Strings.ACTION_REFRESHFEEDS));
+					sendBroadcast(new Intent(Strings.ACTION_REFRESHFEEDS).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.RefreshBroadcastReceiver"));
 				}
         	}.start();
         }
@@ -256,245 +259,203 @@ public class RSSOverview extends ListActivity {
 	@Override
 	public boolean onMenuItemSelected(int featureId, final MenuItem item) {
 		setFeedSortEnabled(false);
-		switch (item.getItemId()) {
-			case R.id.menu_addfeed: {
-				startActivity(new Intent(Intent.ACTION_INSERT).setData(FeedData.FeedColumns.CONTENT_URI));
-				break;
-			}
-			case R.id.menu_refresh: {
-				new Thread() {
-					public void run() {
-						sendBroadcast(new Intent(Strings.ACTION_REFRESHFEEDS).putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, PreferenceManager.getDefaultSharedPreferences(RSSOverview.this).getBoolean(Strings.SETTINGS_OVERRIDEWIFIONLY, false)));
-					}
-				}.start();
-				break;
-			}
-			case CONTEXTMENU_EDIT_ID: {
-				startActivity(new Intent(Intent.ACTION_EDIT).setData(FeedData.FeedColumns.CONTENT_URI(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)));
-				break;
-			}
-			case CONTEXTMENU_REFRESH_ID: {
-				final String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_addfeed) {
+            startActivity(new Intent(Intent.ACTION_INSERT).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.FeedConfigActivity").setData(FeedData.FeedColumns.CONTENT_URI));
+        } else if (itemId == R.id.menu_refresh) {
+            new Thread() {
+                public void run() {
+                    sendBroadcast(new Intent(Strings.ACTION_REFRESHFEEDS).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.RefreshBroadcastReceiver").putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, PreferenceManager.getDefaultSharedPreferences(RSSOverview.this).getBoolean(Strings.SETTINGS_OVERRIDEWIFIONLY, false)));
+                }
+            }.start();
+        } else if (itemId == CONTEXTMENU_EDIT_ID) {
+            startActivity(new Intent(Intent.ACTION_EDIT).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.FeedConfigActivity").setData(FeedData.FeedColumns.CONTENT_URI(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)));
+        } else if (itemId == CONTEXTMENU_REFRESH_ID) {
+            final String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
 
-				ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-				
-				final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-				
-				if (networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED) { // since we have acquired the networkInfo, we use it for basic checks
-					final Intent intent = new Intent(Strings.ACTION_REFRESHFEEDS).putExtra(Strings.FEEDID, id);
-					
-					final Thread thread = new Thread() {
-						public void run() {
-							sendBroadcast(intent);
-						}
-					};
-					
-					if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || PreferenceManager.getDefaultSharedPreferences(RSSOverview.this).getBoolean(Strings.SETTINGS_OVERRIDEWIFIONLY, false)) {
-						intent.putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, true);
-						thread.start();
-					} else {
-						Cursor cursor = getContentResolver().query(FeedData.FeedColumns.CONTENT_URI(id), new String[] {FeedData.FeedColumns.WIFIONLY}, null, null, null);
-						
-						cursor.moveToFirst();
-						
-						if (cursor.isNull(0) || cursor.getInt(0) == 0) {
-							thread.start();
-						} else {
-							Builder builder = new AlertDialog.Builder(this);
-							
-							builder.setIcon(android.R.drawable.ic_dialog_alert);
-							builder.setTitle(R.string.dialog_hint);
-							builder.setMessage(R.string.question_refreshwowifi);
-							builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-					            public void onClick(DialogInterface dialog, int which) {
-					            	intent.putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, true);
-					            	thread.start();
-					            }
-					        });
-							builder.setNeutralButton(R.string.button_alwaysokforall, new DialogInterface.OnClickListener() {
-					            public void onClick(DialogInterface dialog, int which) {
-					            	PreferenceManager.getDefaultSharedPreferences(RSSOverview.this).edit().putBoolean(Strings.SETTINGS_OVERRIDEWIFIONLY, true).commit();
-					            	intent.putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, true);
-					            	thread.start();
-					            }
-					        });
-							builder.setNegativeButton(android.R.string.no, null);
-							builder.show();
-						}
-						cursor.close();
-					}
-					
-				}
-				break;
-			}
-			case CONTEXTMENU_DELETE_ID: {
-				String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
-				
-				Cursor cursor = getContentResolver().query(FeedData.FeedColumns.CONTENT_URI(id), new String[] {FeedData.FeedColumns.NAME}, null, null, null);
-				
-				cursor.moveToFirst();
-				
-				Builder builder = new AlertDialog.Builder(this);
-				
-				builder.setIcon(android.R.drawable.ic_dialog_alert);
-				builder.setTitle(cursor.getString(0));
-				builder.setMessage(R.string.question_deletefeed);
-				builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-		            public void onClick(DialogInterface dialog, int which) {
-		            	new Thread() {
-		            		public void run() {
-		            			getContentResolver().delete(FeedData.FeedColumns.CONTENT_URI(Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)), null, null);
-								sendBroadcast(new Intent(Strings.ACTION_UPDATEWIDGET));
-		            		}
-		            	}.start();
-		            }
-		        });
-				builder.setNegativeButton(android.R.string.no, null);
-				cursor.close();
-				builder.show();
-				break;
-			}
-			case CONTEXTMENU_MARKASREAD_ID: {
-				new Thread() {
-					public void run() {
-						String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
-						
-						if (getContentResolver().update(FeedData.EntryColumns.CONTENT_URI(id), getReadContentValues(), new StringBuilder(FeedData.EntryColumns.READDATE).append(Strings.DB_ISNULL).toString(), null) > 0) {
-							getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI(id), null);
-						}
-					}
-				}.start();
-				break;
-			}
-			case CONTEXTMENU_MARKASUNREAD_ID: {
-				new Thread() {
-					public void run() {
-						String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
-						
-						if (getContentResolver().update(FeedData.EntryColumns.CONTENT_URI(id), getUnreadContentValues(), null, null) > 0) {
-							getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI(id), null);;
-						}
-					}
-				}.start();
-                break;
-			}
-			case CONTEXTMENU_SETTINGS_ID: {
-				startActivity(new Intent(this, FeedPrefsActivity.class).putExtra(FeedData.FeedColumns._ID, Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)));
-				break;
-			}
-			case CONTEXTMENU_DELETEREAD_ID: {
-				new Thread() {
-					public void run() {
-						String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
-						
-						Uri uri = FeedData.EntryColumns.CONTENT_URI(id);
-						
-						String selection = Strings.READDATE_GREATERZERO+Strings.DB_AND+" ("+Strings.DB_EXCUDEFAVORITE+")";
-						
-						FeedData.deletePicturesOfFeed(RSSOverview.this, uri, selection);
-						if (getContentResolver().delete(uri, selection, null) > 0) {
-							getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI(id), null);
-						}
-					}
-				}.start();
-				break;
-			}
-			case CONTEXTMENU_DELETEALLENTRIES_ID: {
-				showDeleteAllEntriesQuestion(this, FeedData.EntryColumns.CONTENT_URI(Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)));
-				break;
-			}
-			case CONTEXTMENU_RESETUPDATEDATE_ID: {
-				ContentValues values = new ContentValues();
-				
-				values.put(FeedData.FeedColumns.LASTUPDATE, 0);
-				values.put(FeedData.FeedColumns.REALLASTUPDATE, 0);
-				getContentResolver().update(FeedData.FeedColumns.CONTENT_URI(Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)), values, null, null);
-				break;
-			}
-				
-			case R.id.menu_settings: {
-				startActivityForResult(new Intent(this, ApplicationPreferencesActivity.class), ACTIVITY_APPLICATIONPREFERENCES_ID);
-				break;
-			}
-			case R.id.menu_allread: {
-				new Thread() {
-					public void run() {
-						if (getContentResolver().update(FeedData.EntryColumns.CONTENT_URI, getReadContentValues(), new StringBuilder(FeedData.EntryColumns.READDATE).append(Strings.DB_ISNULL).toString(), null) > 0) {
-							getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI, null);
-						}
-					}
-				}.start();
-				break;
-			}
-			case R.id.menu_about: {
-				showDialog(DIALOG_ABOUT);
-				break;
-			}
-			case R.id.menu_import: {
-				if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ||Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
-					final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					
-					builder.setTitle(R.string.select_file);
-					
-					try {
-						final String[] fileNames = Environment.getExternalStorageDirectory().list(new FilenameFilter() {
-							public boolean accept(File dir, String filename) {
-								return new File(dir, filename).isFile();
-							}
-						});
-						builder.setItems(fileNames, new DialogInterface.OnClickListener()  {
-							public void onClick(DialogInterface dialog, int which) {
-								try {
-									OPML.importFromFile(new StringBuilder(Environment.getExternalStorageDirectory().toString()).append(File.separator).append(fileNames[which]).toString(), RSSOverview.this);
-								} catch (Exception e) {
-									showDialog(DIALOG_ERROR_FEEDIMPORT);
-								}
-							}
-						});
-						builder.show();
-					} catch (Exception e) {
-						showDialog(DIALOG_ERROR_FEEDIMPORT);
-					}
-				} else {
-					showDialog(DIALOG_ERROR_EXTERNALSTORAGENOTAVAILABLE);
-				}
-				
-				break;
-			}
-			case R.id.menu_export: {
-				if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ||Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
-					try {
-						String filename = new StringBuilder(Environment.getExternalStorageDirectory().toString()).append("/sparse_rss_").append(System.currentTimeMillis()).append(".opml").toString();
-						
-						OPML.exportToFile(filename, this);
-						Toast.makeText(this, String.format(getString(R.string.message_exportedto), filename), Toast.LENGTH_LONG).show();
-					} catch (Exception e) {
-						showDialog(DIALOG_ERROR_FEEDEXPORT);
-					}
-				} else {
-					showDialog(DIALOG_ERROR_EXTERNALSTORAGENOTAVAILABLE);
-				}
-				break;
-			}
-			case R.id.menu_enablefeedsort: {
-				setFeedSortEnabled(true);
-				break;
-			}
-			case R.id.menu_deleteread: {
-				FeedData.deletePicturesOfFeedAsync(this, FeedData.EntryColumns.CONTENT_URI, Strings.READDATE_GREATERZERO);
-				getContentResolver().delete(FeedData.EntryColumns.CONTENT_URI, Strings.READDATE_GREATERZERO, null);
-				((RSSOverviewListAdapter) getListAdapter()).notifyDataSetChanged();
-				break;
-			}
-			case R.id.menu_deleteallentries: {
-				showDeleteAllEntriesQuestion(this, FeedData.EntryColumns.CONTENT_URI);
-				break;
-			}
-			case R.id.menu_disablefeedsort: {
-				// do nothing as the feed sort gets disabled anyway
-				break;
-			}
-		}
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+            if (networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED) { // since we have acquired the networkInfo, we use it for basic checks
+                final Intent intent = new Intent(Strings.ACTION_REFRESHFEEDS).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.RefreshBroadcastReceiver").putExtra(Strings.FEEDID, id);
+
+                final Thread thread = new Thread() {
+                    public void run() {
+                        sendBroadcast(intent);
+                    }
+                };
+
+                if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || PreferenceManager.getDefaultSharedPreferences(RSSOverview.this).getBoolean(Strings.SETTINGS_OVERRIDEWIFIONLY, false)) {
+                    intent.putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, true);
+                    thread.start();
+                } else {
+                    Cursor cursor = getContentResolver().query(FeedData.FeedColumns.CONTENT_URI(id), new String[]{FeedData.FeedColumns.WIFIONLY}, null, null, null);
+
+                    cursor.moveToFirst();
+
+                    if (cursor.isNull(0) || cursor.getInt(0) == 0) {
+                        thread.start();
+                    } else {
+                        Builder builder = new Builder(this);
+
+                        builder.setIcon(android.R.drawable.ic_dialog_alert);
+                        builder.setTitle(R.string.dialog_hint);
+                        builder.setMessage(R.string.question_refreshwowifi);
+                        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                intent.putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, true);
+                                thread.start();
+                            }
+                        });
+                        builder.setNeutralButton(R.string.button_alwaysokforall, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                PreferenceManager.getDefaultSharedPreferences(RSSOverview.this).edit().putBoolean(Strings.SETTINGS_OVERRIDEWIFIONLY, true).commit();
+                                intent.putExtra(Strings.SETTINGS_OVERRIDEWIFIONLY, true);
+                                thread.start();
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.no, null);
+                        builder.show();
+                    }
+                    cursor.close();
+                }
+
+            }
+        } else if (itemId == CONTEXTMENU_DELETE_ID) {
+            String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
+
+            Cursor cursor = getContentResolver().query(FeedData.FeedColumns.CONTENT_URI(id), new String[]{FeedData.FeedColumns.NAME}, null, null, null);
+
+            cursor.moveToFirst();
+
+            Builder builder = new Builder(this);
+
+            builder.setIcon(android.R.drawable.ic_dialog_alert);
+            builder.setTitle(cursor.getString(0));
+            builder.setMessage(R.string.question_deletefeed);
+            builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    new Thread() {
+                        public void run() {
+                            getContentResolver().delete(FeedData.FeedColumns.CONTENT_URI(Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)), null, null);
+                            sendBroadcast(new Intent(Strings.ACTION_UPDATEWIDGET));
+                        }
+                    }.start();
+                }
+            });
+            builder.setNegativeButton(android.R.string.no, null);
+            cursor.close();
+            builder.show();
+        } else if (itemId == CONTEXTMENU_MARKASREAD_ID) {
+            new Thread() {
+                public void run() {
+                    String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
+
+                    if (getContentResolver().update(FeedData.EntryColumns.CONTENT_URI(id), getReadContentValues(), new StringBuilder(FeedData.EntryColumns.READDATE).append(Strings.DB_ISNULL).toString(), null) > 0) {
+                        getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI(id), null);
+                    }
+                }
+            }.start();
+        } else if (itemId == CONTEXTMENU_MARKASUNREAD_ID) {
+            new Thread() {
+                public void run() {
+                    String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
+
+                    if (getContentResolver().update(FeedData.EntryColumns.CONTENT_URI(id), getUnreadContentValues(), null, null) > 0) {
+                        getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI(id), null);
+                        ;
+                    }
+                }
+            }.start();
+        } else if (itemId == CONTEXTMENU_SETTINGS_ID) {
+            startActivity(new Intent(this, FeedPrefsActivity.class).putExtra(FeedData.FeedColumns._ID, Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)));
+        } else if (itemId == CONTEXTMENU_DELETEREAD_ID) {
+            new Thread() {
+                public void run() {
+                    String id = Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id);
+
+                    Uri uri = FeedData.EntryColumns.CONTENT_URI(id);
+
+                    String selection = Strings.READDATE_GREATERZERO + Strings.DB_AND + " (" + Strings.DB_EXCUDEFAVORITE + ")";
+
+                    FeedData.deletePicturesOfFeed(RSSOverview.this, uri, selection);
+                    if (getContentResolver().delete(uri, selection, null) > 0) {
+                        getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI(id), null);
+                    }
+                }
+            }.start();
+        } else if (itemId == CONTEXTMENU_DELETEALLENTRIES_ID) {
+            showDeleteAllEntriesQuestion(this, FeedData.EntryColumns.CONTENT_URI(Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)));
+        } else if (itemId == CONTEXTMENU_RESETUPDATEDATE_ID) {
+            ContentValues values = new ContentValues();
+
+            values.put(FeedData.FeedColumns.LASTUPDATE, 0);
+            values.put(FeedData.FeedColumns.REALLASTUPDATE, 0);
+            getContentResolver().update(FeedData.FeedColumns.CONTENT_URI(Long.toString(((AdapterView.AdapterContextMenuInfo) item.getMenuInfo()).id)), values, null, null);
+        } else if (itemId == R.id.menu_settings) {
+            startActivityForResult(new Intent(this, ApplicationPreferencesActivity.class), ACTIVITY_APPLICATIONPREFERENCES_ID);
+        } else if (itemId == R.id.menu_allread) {
+            new Thread() {
+                public void run() {
+                    if (getContentResolver().update(FeedData.EntryColumns.CONTENT_URI, getReadContentValues(), new StringBuilder(FeedData.EntryColumns.READDATE).append(Strings.DB_ISNULL).toString(), null) > 0) {
+                        getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI, null);
+                    }
+                }
+            }.start();
+        } else if (itemId == R.id.menu_about) {
+            showDialog(DIALOG_ABOUT);
+        } else if (itemId == R.id.menu_import) {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+                final Builder builder = new Builder(this);
+
+                builder.setTitle(R.string.select_file);
+
+                try {
+                    final String[] fileNames = Environment.getExternalStorageDirectory().list(new FilenameFilter() {
+                        public boolean accept(File dir, String filename) {
+                            return new File(dir, filename).isFile();
+                        }
+                    });
+                    builder.setItems(fileNames, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                OPML.importFromFile(new StringBuilder(Environment.getExternalStorageDirectory().toString()).append(File.separator).append(fileNames[which]).toString(), RSSOverview.this);
+                            } catch (Exception e) {
+                                showDialog(DIALOG_ERROR_FEEDIMPORT);
+                            }
+                        }
+                    });
+                    builder.show();
+                } catch (Exception e) {
+                    showDialog(DIALOG_ERROR_FEEDIMPORT);
+                }
+            } else {
+                showDialog(DIALOG_ERROR_EXTERNALSTORAGENOTAVAILABLE);
+            }
+        } else if (itemId == R.id.menu_export) {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+                try {
+                    String filename = new StringBuilder(Environment.getExternalStorageDirectory().toString()).append("/sparse_rss_").append(System.currentTimeMillis()).append(".opml").toString();
+
+                    OPML.exportToFile(filename, this);
+                    Toast.makeText(this, String.format(getString(R.string.message_exportedto), filename), Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    showDialog(DIALOG_ERROR_FEEDEXPORT);
+                }
+            } else {
+                showDialog(DIALOG_ERROR_EXTERNALSTORAGENOTAVAILABLE);
+            }
+        } else if (itemId == R.id.menu_enablefeedsort) {
+            setFeedSortEnabled(true);
+        } else if (itemId == R.id.menu_deleteread) {
+            FeedData.deletePicturesOfFeedAsync(this, FeedData.EntryColumns.CONTENT_URI, Strings.READDATE_GREATERZERO);
+            getContentResolver().delete(FeedData.EntryColumns.CONTENT_URI, Strings.READDATE_GREATERZERO, null);
+            ((RSSOverviewListAdapter) getListAdapter()).notifyDataSetChanged();
+        } else if (itemId == R.id.menu_deleteallentries) {
+            showDeleteAllEntriesQuestion(this, FeedData.EntryColumns.CONTENT_URI);
+        } else if (itemId == R.id.menu_disablefeedsort) {// do nothing as the feed sort gets disabled anyway
+        }
 		return true;
 	}
 	
@@ -516,7 +477,7 @@ public class RSSOverview extends ListActivity {
 	protected void onListItemClick(ListView listView, View view, int position, long id) {
 		setFeedSortEnabled(false);
 		
-		Intent intent = new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.CONTENT_URI(Long.toString(id)));
+		Intent intent = new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.CONTENT_URI(Long.toString(id))).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.EntriesListActivity");
 		
 		intent.putExtra(FeedData.FeedColumns._ID, id);
 		startActivity(intent);
@@ -556,7 +517,7 @@ public class RSSOverview extends ListActivity {
 				});
 				builder.setNeutralButton(R.string.changelog, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
-						startActivity(new Intent(Intent.ACTION_VIEW, CANGELOG_URI));
+						startActivity(new Intent(Intent.ACTION_VIEW, CANGELOG_URI).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.EntriesListActivity"));
 					}
 				});
 				return builder.create();

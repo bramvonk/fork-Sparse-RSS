@@ -25,6 +25,7 @@
 
 package de.shandschuh.sparserss;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -113,12 +114,17 @@ public class MainTabActivity extends TabActivity {
         }
 	}
 	
-	@Override
+	@SuppressLint("UnspecifiedRegisterReceiverFlag")
+    @Override
 	protected void onResume()
 	{
 		super.onResume();
 		setProgressBarIndeterminateVisibility(isCurrentlyRefreshing());
-		registerReceiver(refreshReceiver, new IntentFilter("de.shandschuh.sparserss.REFRESH"));
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			registerReceiver(refreshReceiver, new IntentFilter("de.shandschuh.sparserss.REFRESH"), Context.RECEIVER_NOT_EXPORTED);
+		} else {
+			registerReceiver(refreshReceiver, new IntentFilter("de.shandschuh.sparserss.REFRESH"));
+		}
 	}
 	
 	@Override
@@ -174,9 +180,13 @@ public class MainTabActivity extends TabActivity {
 		this.menu = menu;
 
 		Activity activity = getCurrentActivity();
-		
+
 		if (hasContent && activity != null) {
 			return activity.onCreateOptionsMenu(menu);
+		} else if (hasContent) {
+			// Fallback: directly inflate the menu if getCurrentActivity() returns null (TabActivity deprecated)
+			getMenuInflater().inflate(R.menu.feedoverview, menu);
+			return true;
 		} else {
 			menu.add(Strings.EMPTY); // to let the menu be available
 			return true;
@@ -186,9 +196,12 @@ public class MainTabActivity extends TabActivity {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		Activity activity = getCurrentActivity();
-		
+
 		if (hasContent && activity != null) {
 			return activity.onMenuItemSelected(featureId, item);
+		} else if (hasContent && RSSOverview.INSTANCE != null) {
+			// Fallback: use static instance if getCurrentActivity() returns null (TabActivity deprecated)
+			return RSSOverview.INSTANCE.onMenuItemSelected(featureId, item);
 		} else {
 			return super.onMenuItemSelected(featureId, item);
 		}
@@ -197,9 +210,12 @@ public class MainTabActivity extends TabActivity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		Activity activity = getCurrentActivity();
-		
+
 		if (hasContent && activity != null) {
 			return activity.onPrepareOptionsMenu(menu);
+		} else if (hasContent && RSSOverview.INSTANCE != null) {
+			// Fallback: use static instance if getCurrentActivity() returns null (TabActivity deprecated)
+			return RSSOverview.INSTANCE.onPrepareOptionsMenu(menu);
 		} else {
 			return super.onPrepareOptionsMenu(menu);
 		}

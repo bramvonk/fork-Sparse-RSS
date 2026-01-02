@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -91,7 +92,11 @@ public class RefreshService extends Service {
 
 	private void restartTimer(boolean created) {
 		if (timerIntent == null) {
-			timerIntent = PendingIntent.getBroadcast(this, 0, refreshBroadcastIntent, 0);
+			int flags = 0;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				flags = PendingIntent.FLAG_IMMUTABLE;
+			}
+			timerIntent = PendingIntent.getBroadcast(this, 0, refreshBroadcastIntent, flags);
 		} else {
 			alarmManager.cancel(timerIntent);
 		}

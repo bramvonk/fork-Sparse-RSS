@@ -402,7 +402,7 @@ public class EntryActivity extends Activity {
 				
 				entryCursor.close();
 				finish();
-				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)).setClassName(/* TODO: provide the application ID. For example: */ getPackageName(), "de.shandschuh.sparserss.EntriesListActivity"));
 			} else {
 				setTitle(entryCursor.getString(titlePosition));
 				if (titleTextView != null) {
@@ -731,37 +731,31 @@ public class EntryActivity extends Activity {
 	
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.menu_copytoclipboard: {
-				if (link != null) {
-					((ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setText(link);
-				}
-				break;
-			}
-			case R.id.menu_delete: {
-				getContentResolver().delete(uri, null, null);
-				if (localPictures) {
-					FeedData.deletePicturesOfEntry(_id);
-				}
-				
-				if (nextButton.isEnabled()) {
-					nextButton.performClick();
-				} else {
-					if (previousButton.isEnabled()) {
-						previousButton.performClick();
-					} else {
-						finish();
-					}
-				}
-				break;
-			}
-			case R.id.menu_share: {
-				if (link != null) {
-					startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_TEXT, link).setType(TEXTPLAIN), getString(R.string.menu_share)));
-				}
-				break;
-			}
-		}
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_copytoclipboard) {
+            if (link != null) {
+                ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setText(link);
+            }
+        } else if (itemId == R.id.menu_delete) {
+            getContentResolver().delete(uri, null, null);
+            if (localPictures) {
+                FeedData.deletePicturesOfEntry(_id);
+            }
+
+            if (nextButton.isEnabled()) {
+                nextButton.performClick();
+            } else {
+                if (previousButton.isEnabled()) {
+                    previousButton.performClick();
+                } else {
+                    finish();
+                }
+            }
+        } else if (itemId == R.id.menu_share) {
+            if (link != null) {
+                startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_TEXT, link).setType(TEXTPLAIN), getString(R.string.menu_share)));
+            }
+        }
 		return true;
 	}
 

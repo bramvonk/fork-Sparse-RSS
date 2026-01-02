@@ -35,6 +35,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.view.View;
 import android.widget.RemoteViews;
 import de.shandschuh.sparserss.MainTabActivity;
@@ -88,7 +89,11 @@ public class SparseRSSAppWidgetProvider extends AppWidgetProvider {
         
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.homescreenwidget);
 
-        views.setOnClickPendingIntent(R.id.feed_icon, PendingIntent.getActivity(context, 0, new Intent(context, MainTabActivity.class), 0));
+        int flags = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags = PendingIntent.FLAG_IMMUTABLE;
+        }
+        views.setOnClickPendingIntent(R.id.feed_icon, PendingIntent.getActivity(context, 0, new Intent(context, MainTabActivity.class), flags));
         
         int k = 0;
         
@@ -121,7 +126,11 @@ public class SparseRSSAppWidgetProvider extends AppWidgetProvider {
 				views.setViewVisibility(ICON_IDS[k], View.GONE);
 				views.setTextViewText(IDS[k], cursor.getString(0));
 			}
-        	views.setOnClickPendingIntent(IDS[k++], PendingIntent.getActivity(context, 0, new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.ENTRY_CONTENT_URI(cursor.getString(1))), PendingIntent.FLAG_CANCEL_CURRENT));
+			int itemFlags = PendingIntent.FLAG_CANCEL_CURRENT;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				itemFlags |= PendingIntent.FLAG_IMMUTABLE;
+			}
+        	views.setOnClickPendingIntent(IDS[k++], PendingIntent.getActivity(context, 0, new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.ENTRY_CONTENT_URI(cursor.getString(1))), itemFlags));
         }
         cursor.close();
         for (; k < IDS.length; k++) {

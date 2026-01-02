@@ -44,8 +44,10 @@ import java.util.zip.GZIPInputStream;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.os.Build;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -153,27 +155,17 @@ public class FetcherService extends IntentService {
             if (updates.count > 0) {
 				if (preferences.getBoolean(Strings.SETTINGS_NOTIFICATIONSENABLED, false)) {
 					Cursor cursor = getContentResolver().query(FeedData.EntryColumns.CONTENT_URI, new String[] {COUNT}, new StringBuilder(FeedData.EntryColumns.READDATE).append(Strings.DB_ISNULL).toString(), null, null);
-							
+
 					cursor.moveToFirst();
 					int newCount = cursor.getInt(0);
 					cursor.close();
 
 					String text = new StringBuilder().append(newCount).append(' ').append(getString(R.string.newentries)).toString();
-							
-					Notification notification = new Notification(R.drawable.ic_statusbar_rss, text, System.currentTimeMillis());
-							
-					Intent notificationIntent = new Intent(FetcherService.this, MainTabActivity.class);
-							
-					PendingIntent contentIntent = PendingIntent.getActivity(FetcherService.this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-					if (preferences.getBoolean(Strings.SETTINGS_NOTIFICATIONSVIBRATE, false)) {
-						notification.defaults = Notification.DEFAULT_VIBRATE;
-					} 
-					notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_SHOW_LIGHTS;
-					notification.ledARGB = 0xffffffff;
-					notification.ledOnMS = 300;
-					notification.ledOffMS = 1000;
-							
+					Intent notificationIntent = new Intent(FetcherService.this, MainTabActivity.class);
+
+					PendingIntent contentIntent = PendingIntent.getActivity(FetcherService.this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
                     StringBuilder ids = new StringBuilder();
                     for( String id : updates.feedIds ) {
                         ids.append(",").append(id);
@@ -197,11 +189,47 @@ public class FetcherService extends IntentService {
                         ringtone = preferences.getString(Strings.SETTINGS_NOTIFICATIONSRINGTONE, null);
                     }
                     ringCursor.close();
-							
-					if (ringtone != null && ringtone.length() > 0) {
-						notification.sound = Uri.parse(ringtone);
+
+					// Create notification channel for Android 8.0+
+					String channelId = "rss_updates";
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+						NotificationChannel channel = new NotificationChannel(
+							channelId,
+							getString(R.string.rss_feeds),
+							NotificationManager.IMPORTANCE_DEFAULT
+						);
+						channel.enableLights(true);
+						channel.setLightColor(0xffffffff);
+						channel.enableVibration(preferences.getBoolean(Strings.SETTINGS_NOTIFICATIONSVIBRATE, false));
+						if (ringtone != null && ringtone.length() > 0) {
+							channel.setSound(Uri.parse(ringtone), null);
+						}
+						notificationManager.createNotificationChannel(channel);
 					}
-					notification.setLatestEventInfo(FetcherService.this, getString(R.string.rss_feeds), text, contentIntent);
+
+					// Build notification using modern API
+					Notification.Builder builder = new Notification.Builder(FetcherService.this)
+						.setSmallIcon(R.drawable.ic_statusbar_rss)
+						.setContentTitle(getString(R.string.rss_feeds))
+						.setContentText(text)
+						.setContentIntent(contentIntent)
+						.setAutoCancel(true)
+						.setLights(0xffffffff, 300, 1000)
+						.setWhen(System.currentTimeMillis());
+
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+						builder.setChannelId(channelId);
+					} else {
+						// For pre-Oreo devices, set sound and vibration directly
+						if (preferences.getBoolean(Strings.SETTINGS_NOTIFICATIONSVIBRATE, false)) {
+							builder.setDefaults(Notification.DEFAULT_VIBRATE);
+						}
+						if (ringtone != null && ringtone.length() > 0) {
+							builder.setSound(Uri.parse(ringtone));
+						}
+					}
+
+					Notification notification = builder.build();
 					notificationManager.notify(0, notification);
 				} else {
 					notificationManager.cancel(0);
