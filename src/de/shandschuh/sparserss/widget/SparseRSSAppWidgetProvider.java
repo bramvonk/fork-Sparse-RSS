@@ -46,9 +46,9 @@ import de.shandschuh.sparserss.provider.FeedData;
 public class SparseRSSAppWidgetProvider extends AppWidgetProvider {
 	private static final String LIMIT = " limit ";
 	
-	private static final int[] IDS = {R.id.news_1, R.id.news_2, R.id.news_3, R.id.news_4, R.id.news_5, R.id.news_6, R.id.news_7, R.id.news_8, R.id.news_9, R.id.news_10};
+	private static final int[] IDS = {R.id.news_1, R.id.news_2, R.id.news_3, R.id.news_4, R.id.news_5, R.id.news_6, R.id.news_7, R.id.news_8, R.id.news_9, R.id.news_10, R.id.news_11, R.id.news_12, R.id.news_13, R.id.news_14, R.id.news_15, R.id.news_16, R.id.news_17, R.id.news_18, R.id.news_19, R.id.news_20};
 	
-	private static final int[] ICON_IDS = {R.id.news_icon_1, R.id.news_icon_2, R.id.news_icon_3, R.id.news_icon_4, R.id.news_icon_5, R.id.news_icon_6, R.id.news_icon_7, R.id.news_icon_8, R.id.news_icon_9, R.id.news_icon_10};
+	private static final int[] ICON_IDS = {R.id.news_icon_1, R.id.news_icon_2, R.id.news_icon_3, R.id.news_icon_4, R.id.news_icon_5, R.id.news_icon_6, R.id.news_icon_7, R.id.news_icon_8, R.id.news_icon_9, R.id.news_icon_10, R.id.news_icon_11, R.id.news_icon_12, R.id.news_icon_13, R.id.news_icon_14, R.id.news_icon_15, R.id.news_icon_16, R.id.news_icon_17, R.id.news_icon_18, R.id.news_icon_19, R.id.news_icon_20};
 	
 	public static final int STANDARD_BACKGROUND = 0x7c000000;
 	
