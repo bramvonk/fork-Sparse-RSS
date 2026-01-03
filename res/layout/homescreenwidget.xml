@@ -32,6 +32,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -47,6 +48,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -62,6 +64,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -77,6 +80,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -92,6 +96,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -107,6 +112,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -122,6 +128,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -137,6 +144,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -152,6 +160,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -167,6 +176,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -183,6 +193,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -198,6 +209,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_12"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -213,6 +225,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_13"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -228,6 +241,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_14"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -243,6 +257,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -258,6 +273,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -273,6 +289,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_17"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -288,6 +305,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_18"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -303,6 +321,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_19"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -318,6 +337,7 @@
             android:textColor="@xml/widgettext"
             android:singleLine="true"
             android:text=""
+            android:textSize="10sp"
             android:id="@+id/news_20"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
