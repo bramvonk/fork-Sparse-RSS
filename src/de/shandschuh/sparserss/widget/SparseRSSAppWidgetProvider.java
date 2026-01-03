@@ -130,7 +130,10 @@ public class SparseRSSAppWidgetProvider extends AppWidgetProvider {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 				itemFlags |= PendingIntent.FLAG_IMMUTABLE;
 			}
-        	views.setOnClickPendingIntent(IDS[k++], PendingIntent.getActivity(context, 0, new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.ENTRY_CONTENT_URI(cursor.getString(1))), itemFlags));
+        	Intent intent = new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.ENTRY_CONTENT_URI(cursor.getString(1)));
+        	intent.setClassName(context, "de.shandschuh.sparserss.EntryActivity");
+        	views.setOnClickPendingIntent(IDS[k], PendingIntent.getActivity(context, k, intent, itemFlags));
+            k++;
         }
         cursor.close();
         for (; k < IDS.length; k++) {

@@ -179,16 +179,21 @@ public class MainTabActivity extends TabActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		this.menu = menu;
 
+		if (!hasContent) {
+			menu.add(Strings.EMPTY); // to let the menu be available
+			return true;
+		}
+
 		Activity activity = getCurrentActivity();
 
-		if (hasContent && activity != null) {
+		if (activity != null) {
 			return activity.onCreateOptionsMenu(menu);
-		} else if (hasContent) {
-			// Fallback: directly inflate the menu if getCurrentActivity() returns null (TabActivity deprecated)
-			getMenuInflater().inflate(R.menu.feedoverview, menu);
-			return true;
+		} else if (RSSOverview.INSTANCE != null) {
+			// Fallback: use static instance if getCurrentActivity() returns null (TabActivity deprecated)
+			return RSSOverview.INSTANCE.onCreateOptionsMenu(menu);
 		} else {
-			menu.add(Strings.EMPTY); // to let the menu be available
+			// Last resort: directly inflate the menu
+			getMenuInflater().inflate(R.menu.feedoverview, menu);
 			return true;
 		}
 	}
@@ -209,15 +214,22 @@ public class MainTabActivity extends TabActivity {
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (!hasContent) {
+			return super.onPrepareOptionsMenu(menu);
+		}
+
 		Activity activity = getCurrentActivity();
 
-		if (hasContent && activity != null) {
+		if (activity != null) {
 			return activity.onPrepareOptionsMenu(menu);
-		} else if (hasContent && RSSOverview.INSTANCE != null) {
+		} else if (RSSOverview.INSTANCE != null) {
 			// Fallback: use static instance if getCurrentActivity() returns null (TabActivity deprecated)
 			return RSSOverview.INSTANCE.onPrepareOptionsMenu(menu);
 		} else {
-			return super.onPrepareOptionsMenu(menu);
+			// Last resort: ensure menu groups are visible
+			menu.setGroupVisible(R.id.menu_group_0, true);
+			menu.setGroupVisible(R.id.menu_group_1, false);
+			return true;
 		}
 	}
 	
