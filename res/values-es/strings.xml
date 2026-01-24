@@ -43,8 +43,6 @@
     <string name="settings_category_contentpresentation">Opciones de presentación</string>
     <string name="settings_prioritize">Dar prioridad a no leídos</string>
     <string name="settings_prioritize_description">Priorizar canales sin leer sobre los leídos</string>
-    <string name="settings_keeptime">Tiempo que se mantendrán las entradas</string>
-    <string name="settings_keeptime_description">Las entradas anteriores a la fecha indicada serán eliminadas</string>
     <string name="settings_fetchpictures">Descargar imágenes</string>
     <string name="settings_fetchpictures_description">Descargar todas las imágenes y guardar en local</string>
     <string name="settings_blacktextwhite">Texto negro sobre fondo blanco</string>
@@ -102,18 +100,6 @@
         <item>6 horas</item>
         <item>12 horas</item>
         <item>1 día</item>
-    </string-array>
-
-    <string-array name="settings_keeptimes">
-        <item>1 día</item>
-        <item>2 días</item>
-        <item>4 días</item>
-        <item>1 semana</item>
-        <item>2 semanas</item>
-        <item>1 mes</item>
-        <item>2 meses</item>
-        <item>3 meses</item>
-        <item>Eternidad</item>
     </string-array>
 
     <string-array name="settings_fontsizes">

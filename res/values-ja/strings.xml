@@ -46,8 +46,6 @@
     <string name="settings_category_contentpresentation">内容表示方法</string>
     <string name="settings_prioritize">未既読の内容を優先する</string>
     <string name="settings_prioritize_description">未既読記事を既読記事の上に表示する</string>
-    <string name="settings_keeptime">記事の保存期間</string>
-    <string name="settings_keeptime_description">過去の記事を自動的に消去する</string>
     <string name="settings_fetchpictures">画像をダウンロード</string>
     <string name="settings_fetchpictures_description">全ての画像をダウンロードし、保存する</string>
     <string name="settings_lighttheme">テーマカラー・明るい</string>
@@ -141,18 +139,6 @@
         <item>６時間</item>
         <item>１２時間</item>
         <item>１日</item>
-    </string-array>
-
-    <string-array name="settings_keeptimes">
-        <item>１日</item>
-        <item>２日</item>
-        <item>４日</item>
-        <item>１週間</item>
-        <item>２週間</item>
-        <item>１ヶ月</item>
-        <item>２ヶ月</item>
-        <item>３ヶ月</item>
-        <item>永遠に</item>
     </string-array>
 
     <string-array name="settings_fontsizes">

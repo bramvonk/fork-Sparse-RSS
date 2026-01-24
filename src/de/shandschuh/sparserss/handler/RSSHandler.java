@@ -115,9 +115,6 @@ public class RSSHandler extends DefaultHandler {
 	private static final int TIMEZONES_COUNT = 3;
 
 	
-	private static long KEEP_TIME = 345600000l; // 4 days
-	
-	
 	private static final DateFormat[] PUBDATE_DATEFORMATS = {
 		new SimpleDateFormat("EEE', 'd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z", Locale.US),
 		new SimpleDateFormat("d' 'MMM' 'yyyy' 'HH:mm:ss' 'Z", Locale.US),
@@ -139,8 +136,6 @@ public class RSSHandler extends DefaultHandler {
 	
 	private static final String GMT = "GMT";
 	
-	private static final StringBuilder DB_FAVORITE  = new StringBuilder(" AND (").append(Strings.DB_EXCUDEFAVORITE).append(')');
-
 	private static Pattern imgPattern = Pattern.compile("<img src=\\s*['\"]([^'\"]+)['\"][^>]*>"); // middle () is group 1; s* is important for non-whitespaces; ' also usable
 	
 	private Context context;
@@ -189,8 +184,6 @@ public class RSSHandler extends DefaultHandler {
 	
 	private boolean done;
 	
-	private Date keepDateBorder;
-	
 	private InputStream inputStream;
 	
 	private Reader reader;
@@ -216,20 +209,16 @@ public class RSSHandler extends DefaultHandler {
 	private boolean nameTagEntered;
 	
 	public RSSHandler(Context context) {
-		KEEP_TIME = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(context).getString(Strings.SETTINGS_KEEPTIME, "4"))*86400000l;
 		this.context = context;
 		this.efficientFeedParsing = true;
 	}
 	
 	public void init(Date lastUpdateDate, final String id, String title, String url) {
-		final long keepDateBorderTime = KEEP_TIME > 0 ? System.currentTimeMillis()-KEEP_TIME : 0;
-		
-		keepDateBorder = new Date(keepDateBorderTime);
 		this.lastUpdateDate = lastUpdateDate;
 		this.id = id;
 		feedEntiresUri = FeedData.EntryColumns.CONTENT_URI(id);
 		
-		final String query = new StringBuilder(FeedData.EntryColumns.DATE).append('<').append(keepDateBorderTime).append(DB_FAVORITE).toString();
+		final String query = Strings.DB_EXCUDEFAVORITE;
 		
 		FeedData.deletePicturesOfFeed(context, feedEntiresUri, query);
 		
@@ -431,7 +420,7 @@ public class RSSHandler extends DefaultHandler {
 			entryDate = parseUpdateDate(dateStringBuilder.toString());
 			dateTagEntered = false;
 		} else if (TAG_ENTRY.equals(localName) || TAG_ITEM.equals(localName)) {
-			if (title != null && (entryDate == null || ((entryDate.after(lastUpdateDate) || !efficientFeedParsing) && entryDate.after(keepDateBorder)))) {
+			if (title != null && (entryDate == null || ((entryDate.after(lastUpdateDate) || !efficientFeedParsing)))) {
 				ContentValues values = new ContentValues();
 				
 				if (entryDate != null && entryDate.getTime() > realLastUpdate) {

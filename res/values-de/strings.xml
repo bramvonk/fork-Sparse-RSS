@@ -47,8 +47,6 @@
     <string name="settings_category_contentpresentation">Inhaltsanzeige</string>
     <string name="settings_prioritize">Bevorzuge ungelesenen Inhalt</string>
     <string name="settings_prioritize_description">Zeige ungelesene Feedeinträge über gelesenen Einträgen</string>
-    <string name="settings_keeptime">Zeit für die die Einträge aufbewahrt werden</string>
-    <string name="settings_keeptime_description">Die Einträge, die älter sind, werden automatisch gelöscht</string>
     <string name="settings_disablepictures">Bilder deaktivieren</string>
     <string name="settings_disablepictures_description">Keine Bilder anzeigen oder laden</string>
     <string name="settings_fetchpictures">Bilder herunterladen</string>
@@ -146,18 +144,6 @@
         <item>6 Stunden</item>
         <item>12 Stunden</item>
         <item>1 Tag</item>
-    </string-array>
-
-    <string-array name="settings_keeptimes">
-        <item>1 Tag</item>
-        <item>2 Tage</item>
-        <item>4 Tage</item>
-        <item>1 Woche</item>
-        <item>2 Wochen</item>
-        <item>1 Monat</item>
-        <item>2 Monate</item>
-        <item>3 Monate</item>
-        <item>Für immer</item>
     </string-array>
 
     <string name="permission_readfeeds">Feeds lesen</string>

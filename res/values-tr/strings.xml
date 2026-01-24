@@ -43,8 +43,6 @@
     <string name="settings_category_contentpresentation">İçerik gösterimi</string>
     <string name="settings_prioritize">Okunmamış içeriğe öncelik ver</string>
     <string name="settings_prioritize_description">Okunmamış besleme mesajlarını okunanların üstünde göster</string>
-    <string name="settings_keeptime">Mesajların tutulma süresi</string>
-    <string name="settings_keeptime_description">Belirtilen zamandan eski mesajlar silinecektir</string>
     <string name="settings_fetchpictures">Görselleri indir</string>
     <string name="settings_fetchpictures_description">Tüm görselleri indir ve yerel olarak tut</string>
     <string name="settings_blacktextwhite">Beyaz zemin üzeri siyah metin</string>
@@ -139,18 +137,6 @@
         <item>6 saat</item>
         <item>12 saat</item>
         <item>1 gün</item>
-    </string-array>
-
-    <string-array name="settings_keeptimes">
-        <item>1 gün</item>
-        <item>2 gün</item>
-        <item>4 gün</item>
-        <item>1 hafta</item>
-        <item>2 hafta</item>
-        <item>1 ay</item>
-        <item>2 ay</item>
-        <item>3 ay</item>
-        <item>sonsuza dek</item>
     </string-array>
 
     <string-array name="settings_fontsizes">

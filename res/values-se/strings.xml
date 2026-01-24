@@ -44,8 +44,6 @@
     <string name="settings_category_contentpresentation">Innehållspresentation</string>
     <string name="settings_prioritize">Prioritera oläst innehåll</string>
     <string name="settings_prioritize_description">Visa olästa feedposter ovanför lästa poster</string>
-    <string name="settings_keeptime">Tid som posterna kommer att behållas</string>
-    <string name="settings_keeptime_description">Poster med äldre datum än det givna kommer att raderas</string>
     <string name="settings_disablepictures">Använd inte bilder</string>
     <string name="settings_disablepictures_description">Visa inte / ladda inte ned några bilder</string>
     <string name="settings_fetchpictures">Ladda ned bilder</string>
@@ -151,18 +149,6 @@
         <item>6 timmar</item>
         <item>12 timmar</item>
         <item>1 dag</item>
-    </string-array>
-
-    <string-array name="settings_keeptimes">
-        <item>1 dag</item>
-        <item>2 dagar</item>
-        <item>4 dagar</item>
-        <item>1 vecka</item>
-        <item>2 veckor</item>
-        <item>1 månad</item>
-        <item>2 månader</item>
-        <item>3 månader</item>
-        <item>För alltid</item>
     </string-array>
 
     <string name="permission_readfeeds">Läs feed data</string>

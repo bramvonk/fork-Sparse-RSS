@@ -48,8 +48,6 @@
     <string name="settings_category_contentpresentation">Интерфейс</string>
     <string name="settings_prioritize">Группы</string>
     <string name="settings_prioritize_description">Располагать прочитанные новости ниже непрочитанных</string>
-    <string name="settings_keeptime">Автоочистка</string>
-    <string name="settings_keeptime_description">Промежуток времени, спустя который новости будут удалены</string>
     <string name="settings_disablepictures">Отключить графику</string>
     <string name="settings_disablepictures_description">Не загружать и не показывать изображения</string>
     <string name="settings_fetchpictures">Сохранять графику</string>
@@ -153,18 +151,6 @@
         <item>6 часов</item>
         <item>12 часов</item>
         <item>1 сутки</item>
-    </string-array>
-
-    <string-array name="settings_keeptimes">
-        <item>1 сутки</item>
-        <item>2 суток</item>
-        <item>4 суток</item>
-        <item>1 неделя</item>
-        <item>2 недели</item>
-        <item>1 месяц</item>
-        <item>2 месяца</item>
-        <item>3 месяца</item>
-        <item>Никогда</item>
     </string-array>
 
     <string-array name="settings_fontsizes">
