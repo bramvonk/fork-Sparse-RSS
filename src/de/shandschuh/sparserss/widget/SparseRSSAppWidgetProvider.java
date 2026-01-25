@@ -85,7 +85,7 @@ public class SparseRSSAppWidgetProvider extends AppWidgetProvider {
 			selection.append(FeedData.EntryColumns.FEED_ID).append(" IN ("+feedIds).append(')');
 		}
 
-		Cursor cursor = context.getContentResolver().query(FeedData.EntryColumns.CONTENT_URI, new String[] {FeedData.EntryColumns.TITLE, FeedData.EntryColumns._ID, FeedData.FeedColumns.ICON}, selection.toString(), null, new StringBuilder(FeedData.EntryColumns.DATE).append(Strings.DB_DESC).append(LIMIT).append(entryCount).toString());
+		Cursor cursor = context.getContentResolver().query(FeedData.EntryColumns.CONTENT_URI, new String[] {FeedData.EntryColumns.TITLE, FeedData.EntryColumns._ID, FeedData.FeedColumns.ICON}, selection.toString(), null, new StringBuilder(FeedData.EntryColumns.DATE).append(Strings.DB_ASC).append(LIMIT).append(entryCount).toString());
         
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.homescreenwidget);
 

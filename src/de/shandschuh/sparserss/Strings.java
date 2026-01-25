@@ -94,6 +94,8 @@ public final class Strings {
 	public static final String FEEDID = "feedid";
 	
 	public static final String DB_ISNULL = " IS NULL";
+
+    public static final String DB_ASC = " ASC";
 	
 	public static final String DB_DESC = " DESC";
 	
