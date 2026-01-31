@@ -218,11 +218,9 @@ public class RSSHandler extends DefaultHandler {
 		this.id = id;
 		feedEntiresUri = FeedData.EntryColumns.CONTENT_URI(id);
 		
-		final String query = Strings.DB_EXCUDEFAVORITE;
+		FeedData.deletePicturesOfFeed(context, feedEntiresUri, null);
 		
-		FeedData.deletePicturesOfFeed(context, feedEntiresUri, query);
-		
-		context.getContentResolver().delete(feedEntiresUri, query, null);
+		context.getContentResolver().delete(feedEntiresUri, null, null);
 		newCount = 0;
 		feedRefreshed = false;
 		feedTitle = title;

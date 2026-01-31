@@ -48,7 +48,7 @@ public class FeedDataContentProvider extends ContentProvider {
 	
 	private static final String DATABASE_NAME = "sparserss.db";
 	
-	private static final int DATABASE_VERSION = 15;
+	private static final int DATABASE_VERSION = 16;
 	
 	private static final int URI_FEEDS = 1;
 	
@@ -61,11 +61,7 @@ public class FeedDataContentProvider extends ContentProvider {
 	private static final int URI_ALLENTRIES = 5;
 	
 	private static final int URI_ALLENTRIES_ENTRY = 6;
-	
-	private static final int URI_FAVORITES = 7;
-	
-	private static final int URI_FAVORITES_ENTRY = 8;
-	
+
 	protected static final String TABLE_FEEDS = "feeds";
 	
 	private static final String TABLE_ENTRIES = "entries";
@@ -94,8 +90,6 @@ public class FeedDataContentProvider extends ContentProvider {
 		URI_MATCHER.addURI(FeedData.AUTHORITY, "feeds/#/entries/#", URI_ENTRY);
 		URI_MATCHER.addURI(FeedData.AUTHORITY, "entries", URI_ALLENTRIES);
 		URI_MATCHER.addURI(FeedData.AUTHORITY, "entries/#", URI_ALLENTRIES_ENTRY);
-		URI_MATCHER.addURI(FeedData.AUTHORITY, "favorites", URI_FAVORITES);
-		URI_MATCHER.addURI(FeedData.AUTHORITY, "favorites/#", URI_FAVORITES_ENTRY);
 	}
 	
 	private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -141,7 +135,7 @@ public class FeedDataContentProvider extends ContentProvider {
 				executeCatchedSQL(database, new StringBuilder(ALTER_TABLE).append(TABLE_FEEDS).append(ADD).append(FeedData.FeedColumns.PRIORITY).append(' ').append(FeedData.TYPE_INT).toString());
 			}
 			if (oldVersion < 3) {
-				executeCatchedSQL(database, new StringBuilder(ALTER_TABLE).append(TABLE_ENTRIES).append(ADD).append(FeedData.EntryColumns.FAVORITE).append(' ').append(FeedData.TYPE_BOOLEAN).toString());
+				executeCatchedSQL(database, new StringBuilder(ALTER_TABLE).append(TABLE_ENTRIES).append(ADD).append("favorite").append(' ').append(FeedData.TYPE_BOOLEAN).toString());
 			}
 			if (oldVersion < 4) {
 				executeCatchedSQL(database, new StringBuilder(ALTER_TABLE).append(TABLE_FEEDS).append(ADD).append(FeedData.FeedColumns.FETCHMODE).append(' ').append(FeedData.TYPE_INT).toString());
@@ -181,6 +175,9 @@ public class FeedDataContentProvider extends ContentProvider {
 	        if (oldVersion < 15) {
 	            executeCatchedSQL(database, new StringBuilder(ALTER_TABLE).append(TABLE_ENTRIES).append(ADD).append(FeedData.EntryColumns.AUTHOR).append(' ').append(FeedData.TYPE_TEXT).toString());   
 	        }
+            if (oldVersion < 16) {
+                executeCatchedSQL(database, ALTER_TABLE + TABLE_ENTRIES + " DROP COLUMN favorite");
+            }
 		}
 		
 		private void executeCatchedSQL(SQLiteDatabase database, String query) {
@@ -327,15 +324,9 @@ public class FeedDataContentProvider extends ContentProvider {
 				table = TABLE_ENTRIES;
 				break;
 			}
-			case URI_FAVORITES_ENTRY : 
 			case URI_ALLENTRIES_ENTRY : {
 				table = TABLE_ENTRIES;
 				where.append(FeedData.EntryColumns._ID).append('=').append(uri.getPathSegments().get(1));
-				break;
-			}
-			case URI_FAVORITES : {
-				table = TABLE_ENTRIES;
-				where.append(FeedData.EntryColumns.FAVORITE).append(EQUALS_ONE);
 				break;
 			}
 		}
@@ -365,11 +356,9 @@ public class FeedDataContentProvider extends ContentProvider {
 		switch(option) {
 			case URI_FEEDS : return "vnd.android.cursor.dir/vnd.feeddata.feed";
 			case URI_FEED : return "vnd.android.cursor.item/vnd.feeddata.feed";
-			case URI_FAVORITES : 
 			case URI_ALLENTRIES :
 			case URI_ENTRIES : return "vnd.android.cursor.dir/vnd.feeddata.entry";
-			case URI_FAVORITES_ENTRY : 
-			case URI_ALLENTRIES_ENTRY : 
+			case URI_ALLENTRIES_ENTRY :
 			case URI_ENTRY : return "vnd.android.cursor.item/vnd.feeddata.entry";
 			default : throw new IllegalArgumentException("Unknown URI: "+uri);
 		}
@@ -463,15 +452,9 @@ public class FeedDataContentProvider extends ContentProvider {
 				queryBuilder.setTables("entries join (select name, icon, _id as feed_id from feeds) as F on (entries.feedid = F.feed_id)");
 				break;
 			}
-			case URI_FAVORITES_ENTRY : 
 			case URI_ALLENTRIES_ENTRY : {
 				queryBuilder.setTables(TABLE_ENTRIES);
 				queryBuilder.appendWhere(new StringBuilder(FeedData.EntryColumns._ID).append('=').append(uri.getPathSegments().get(1)));
-				break;
-			}
-			case URI_FAVORITES : {
-				queryBuilder.setTables("entries join (select name, icon, _id as feed_id from feeds) as F on (entries.feedid = F.feed_id)");
-				queryBuilder.appendWhere(new StringBuilder(FeedData.EntryColumns.FAVORITE).append(EQUALS_ONE));
 				break;
 			}
 		}
@@ -540,15 +523,9 @@ public class FeedDataContentProvider extends ContentProvider {
 				table = TABLE_ENTRIES;
 				break;
 			}
-			case URI_FAVORITES_ENTRY : 
 			case URI_ALLENTRIES_ENTRY : {
 				table = TABLE_ENTRIES;
 				where.append(FeedData.EntryColumns._ID).append('=').append(uri.getPathSegments().get(1));
-				break;
-			}
-			case URI_FAVORITES : {
-				table = TABLE_ENTRIES;
-				where.append(FeedData.EntryColumns.FAVORITE).append(EQUALS_ONE);				
 				break;
 			}
 		}

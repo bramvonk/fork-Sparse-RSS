@@ -377,7 +377,7 @@ public class RSSOverview extends ListActivity {
 
                     Uri uri = FeedData.EntryColumns.CONTENT_URI(id);
 
-                    String selection = Strings.READDATE_GREATERZERO + Strings.DB_AND + " (" + Strings.DB_EXCUDEFAVORITE + ")";
+                    String selection = Strings.READDATE_GREATERZERO;
 
                     FeedData.deletePicturesOfFeed(RSSOverview.this, uri, selection);
                     if (getContentResolver().delete(uri, selection, null) > 0) {
@@ -547,8 +547,8 @@ public class RSSOverview extends ListActivity {
             public void onClick(DialogInterface dialog, int which) {
             	new Thread() {
 					public void run() {
-						FeedData.deletePicturesOfFeed(context, uri, Strings.DB_EXCUDEFAVORITE);
-						if (context.getContentResolver().delete(uri, Strings.DB_EXCUDEFAVORITE, null) > 0) {
+						FeedData.deletePicturesOfFeed(context, uri, null);
+						if (context.getContentResolver().delete(uri, null, null) > 0) {
 							context.getContentResolver().notifyChange(FeedData.FeedColumns.CONTENT_URI, null);
 						}
 					}

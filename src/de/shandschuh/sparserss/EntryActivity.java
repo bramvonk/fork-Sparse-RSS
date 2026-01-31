@@ -129,8 +129,6 @@ public class EntryActivity extends Activity {
 	
 	private int feedIdPosition;
 	
-	private int favoritePosition;
-	
 	private int readDatePosition;
 	
 	private int enclosurePosition;
@@ -148,9 +146,7 @@ public class EntryActivity extends Activity {
 	private Uri parentUri;
 	
 	private int feedId;
-	
-	boolean favorite;
-	
+
 	private boolean showRead;
 	
 	private boolean canShowIcon;
@@ -237,7 +233,6 @@ public class EntryActivity extends Activity {
 		abstractPosition = entryCursor.getColumnIndex(FeedData.EntryColumns.ABSTRACT);
 		linkPosition = entryCursor.getColumnIndex(FeedData.EntryColumns.LINK);
 		feedIdPosition = entryCursor.getColumnIndex(FeedData.EntryColumns.FEED_ID);
-		favoritePosition = entryCursor.getColumnIndex(FeedData.EntryColumns.FAVORITE);
 		readDatePosition = entryCursor.getColumnIndex(FeedData.EntryColumns.READDATE);
 		enclosurePosition = entryCursor.getColumnIndex(FeedData.EntryColumns.ENCLOSURE);
 		authorPosition = entryCursor.getColumnIndex(FeedData.EntryColumns.AUTHOR);
@@ -458,22 +453,7 @@ public class EntryActivity extends Activity {
 				}
 				
 				((TextView) findViewById(R.id.entry_date)).setText(dateStringBuilder);
-				
-				final ImageView imageView = (ImageView) findViewById(android.R.id.icon);
-				
-				favorite = entryCursor.getInt(favoritePosition) == 1;
-				
-				imageView.setImageResource(favorite ? android.R.drawable.star_on : android.R.drawable.star_off);
-				imageView.setOnClickListener(new OnClickListener() {
-					public void onClick(View view) {
-						favorite = !favorite;
-						imageView.setImageResource(favorite ? android.R.drawable.star_on : android.R.drawable.star_off);
-						ContentValues values = new ContentValues();
-						
-						values.put(FeedData.EntryColumns.FAVORITE, favorite ? 1 : 0);
-						getContentResolver().update(uri, values, null, null);
-					}
-				});
+
 				// loadData does not recognize the encoding without correct html-header
 				localPictures = abstractText.indexOf(Strings.IMAGEID_REPLACEMENT) > -1;
 

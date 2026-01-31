@@ -33,7 +33,6 @@
     <string name="noentries">No entries</string>
     <string name="menu_refresh">Refresh</string>
     <string name="contextmenu_delete">Delete</string>
-    <string name="favorites">Favorites</string>
 
     <string name="editfeed_title">Edit feed</string>
     <string name="newfeed_title">New feed</string>
@@ -135,7 +134,7 @@
     <string name="settings_widgetbackground">Background</string>
     <string name="settings_widgetbackground_description">Color and transparency of the widget background</string>
     <string name="settings_showtabs">Show tabs</string>
-    <string name="settings_showtabs_description">Additional tabs for favorite and all feed-entries</string>
+    <string name="settings_showtabs_description">Additional tab all feed-entries</string>
 
     <string name="settings_category_network">Network</string>
     <string name="settings_standarduseragent">Standard user-agent</string>

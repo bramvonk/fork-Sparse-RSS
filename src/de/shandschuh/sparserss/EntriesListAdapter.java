@@ -59,9 +59,7 @@ public class EntriesListAdapter extends ResourceCursorAdapter {
 	private int dateColumn;
 	
 	private int readDateColumn;
-	
-	private int favoriteColumn;
-	
+
 	private int idColumn;
 	
 	private int feedIconColumn;
@@ -87,11 +85,7 @@ public class EntriesListAdapter extends ResourceCursorAdapter {
 	private Vector<Long> markedAsRead;
 	
 	private Vector<Long> markedAsUnread;
-	
-	private Vector<Long> favorited;
-	
-	private Vector<Long> unfavorited;
-	
+
 	private DateFormat dateFormat;
 	
 	private DateFormat timeFormat;
@@ -107,7 +101,6 @@ public class EntriesListAdapter extends ResourceCursorAdapter {
 		titleColumnPosition = cursor.getColumnIndex(FeedData.EntryColumns.TITLE);
 		dateColumn = cursor.getColumnIndex(FeedData.EntryColumns.DATE);
 		readDateColumn = cursor.getColumnIndex(FeedData.EntryColumns.READDATE);
-		favoriteColumn = cursor.getColumnIndex(FeedData.EntryColumns.FAVORITE);
 		idColumn = cursor.getColumnIndex(FeedData.EntryColumns._ID);
 		linkColumn = cursor.getColumnIndex(FeedData.EntryColumns.LINK);
 		this.showFeedInfo = showFeedInfo;
@@ -118,8 +111,6 @@ public class EntriesListAdapter extends ResourceCursorAdapter {
 		forcedState = STATE_NEUTRAL;
 		markedAsRead = new Vector<Long>();
 		markedAsUnread = new Vector<Long>();
-		favorited = new Vector<Long>();
-		unfavorited = new Vector<Long>();
 		dateFormat = android.text.format.DateFormat.getDateFormat(context);
 		timeFormat = android.text.format.DateFormat.getTimeFormat(context);
 	}
@@ -137,36 +128,7 @@ public class EntriesListAdapter extends ResourceCursorAdapter {
 		final long id = cursor.getLong(idColumn);
 		
 		view.setTag(cursor.getString(linkColumn));
-		 
-		final boolean favorite = !unfavorited.contains(id) && (cursor.getInt(favoriteColumn) == 1 || favorited.contains(id));
-		
-		imageView.setImageResource(favorite ? android.R.drawable.star_on : android.R.drawable.star_off);
-		imageView.setTag(favorite ? Strings.TRUE : Strings.FALSE);
-		imageView.setOnClickListener(new OnClickListener() {
-			public void onClick(View view) {
-				boolean newFavorite = !Strings.TRUE.equals(view.getTag());
-				
-				if (newFavorite) {
-					view.setTag(Strings.TRUE);
-					imageView.setImageResource(android.R.drawable.star_on);
-					favorited.add(id);
-					unfavorited.remove(id);
-				} else {
-					view.setTag(Strings.FALSE);
-					imageView.setImageResource(android.R.drawable.star_off);
-					unfavorited.add(id);
-					favorited.remove(id);
-				}
-				
-				ContentValues values = new ContentValues();
-				
-				values.put(FeedData.EntryColumns.FAVORITE, newFavorite ? 1 : 0);
-				view.getContext().getContentResolver().update(uri, values, new StringBuilder(FeedData.EntryColumns._ID).append(Strings.DB_ARG).toString(), new String[] {Long.toString(id)});
-				context.getContentResolver().notifyChange(FeedData.EntryColumns.FAVORITES_CONTENT_URI, null);
-				
-			}
-		});
-		
+
 		Date date = new Date(cursor.getLong(dateColumn));
 		
 		if (showFeedInfo && feedIconColumn > -1 && feedNameColumn > -1) {

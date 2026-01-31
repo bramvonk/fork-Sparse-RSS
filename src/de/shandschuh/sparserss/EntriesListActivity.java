@@ -200,7 +200,7 @@ public class EntriesListActivity extends ListActivity {
         } else if (itemId == R.id.menu_deleteread) {
             new Thread() { // the delete process takes some time
                 public void run() {
-                    String selection = Strings.READDATE_GREATERZERO + Strings.DB_AND + " (" + Strings.DB_EXCUDEFAVORITE + ")";
+                    String selection = Strings.READDATE_GREATERZERO;
 
                     getContentResolver().delete(uri, selection, null);
                     FeedData.deletePicturesOfFeed(EntriesListActivity.this, uri, selection);
@@ -221,7 +221,7 @@ public class EntriesListActivity extends ListActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     new Thread() {
                         public void run() {
-                            getContentResolver().delete(uri, Strings.DB_EXCUDEFAVORITE, null);
+                            getContentResolver().delete(uri, null, null);
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     entriesListAdapter.getCursor().requery();

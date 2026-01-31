@@ -63,9 +63,7 @@ public class MainTabActivity extends TabActivity {
 	private static final String TAG_NORMAL = "normal";
 	
 	private static final String TAG_ALL = "all";
-	
-	private static final String TAG_FAVORITE = "favorite";
-	
+
 	public static MainTabActivity INSTANCE;
 	
 	public static final boolean POSTGINGERBREAD = !Build.VERSION.RELEASE.startsWith("1") &&
@@ -241,7 +239,6 @@ public class MainTabActivity extends TabActivity {
 	    if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Strings.SETTINGS_SHOWTABS, false)) {
 	    	tabHost.addTab(tabHost.newTabSpec(TAG_ALL).setIndicator(getString(R.string.all)).setContent(new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.CONTENT_URI).putExtra(EntriesListActivity.EXTRA_SHOWFEEDINFO, true)));
 	    	
-		    tabHost.addTab(tabHost.newTabSpec(TAG_FAVORITE).setIndicator(getString(R.string.favorites), getResources().getDrawable(android.R.drawable.star_big_on)).setContent(new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.FAVORITES_CONTENT_URI).putExtra(EntriesListActivity.EXTRA_SHOWFEEDINFO, true).putExtra(EntriesListActivity.EXTRA_AUTORELOAD, true)));
 		    tabsAdded = true;
 		    getTabWidget().setVisibility(View.VISIBLE);
 	    }
@@ -268,7 +265,6 @@ public class MainTabActivity extends TabActivity {
 				TabHost tabHost = getTabHost();
 				
 				tabHost.addTab(tabHost.newTabSpec(TAG_ALL).setIndicator(getString(R.string.all)).setContent(new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.CONTENT_URI).putExtra(EntriesListActivity.EXTRA_SHOWFEEDINFO, true)));
-			    tabHost.addTab(tabHost.newTabSpec(TAG_FAVORITE).setIndicator(getString(R.string.favorites), getResources().getDrawable(android.R.drawable.star_big_on)).setContent(new Intent(Intent.ACTION_VIEW, FeedData.EntryColumns.FAVORITES_CONTENT_URI).putExtra(EntriesListActivity.EXTRA_SHOWFEEDINFO, true)));
 				tabsAdded = true;
 			}
 			getTabWidget().setVisibility(View.VISIBLE);
