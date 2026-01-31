@@ -200,8 +200,6 @@ public class RSSHandler extends DefaultHandler {
 	
 	private StringBuilder guid;
 	
-	private boolean efficientFeedParsing;
-	
 	private boolean authorTagEntered;
 	
 	private StringBuilder author;
@@ -210,7 +208,6 @@ public class RSSHandler extends DefaultHandler {
 	
 	public RSSHandler(Context context) {
 		this.context = context;
-		this.efficientFeedParsing = true;
 	}
 	
 	public void init(Date lastUpdateDate, final String id, String title, String url) {
@@ -418,108 +415,106 @@ public class RSSHandler extends DefaultHandler {
 			entryDate = parseUpdateDate(dateStringBuilder.toString());
 			dateTagEntered = false;
 		} else if (TAG_ENTRY.equals(localName) || TAG_ITEM.equals(localName)) {
-			if (title != null && (entryDate == null || ((entryDate.after(lastUpdateDate) || !efficientFeedParsing)))) {
+			if (title != null) {
 				ContentValues values = new ContentValues();
-				
+
 				if (entryDate != null && entryDate.getTime() > realLastUpdate) {
 					realLastUpdate = entryDate.getTime();
-					
+
 					values.put(FeedData.FeedColumns.REALLASTUPDATE, realLastUpdate);
 					context.getContentResolver().update(FeedData.FeedColumns.CONTENT_URI(id), values, null, null);
 					values.clear();
 				}
-				
+
 				if (entryDate != null) {
 					values.put(FeedData.EntryColumns.DATE, entryDate.getTime());
 					values.putNull(FeedData.EntryColumns.READDATE);
 				}
 				values.put(FeedData.EntryColumns.TITLE, unescapeTitle(title.toString().trim()));
-				
+
 				if (author != null) {
 					values.put(FeedData.EntryColumns.AUTHOR, author.toString());
 				}
-				
+
 				Vector<String> images = null;
-				
+
 				if (description != null) {
 					String descriptionString = description.toString().trim().replaceAll(Strings.HTML_SPAN_REGEX, Strings.EMPTY);
-					
+
 					if (descriptionString.length() > 0) {
 						if (fetchImages) {
 							images = new Vector<String>(4);
-							 
+
 							Matcher matcher = imgPattern.matcher(description);
-							
+
 							while (matcher.find()) {
 								String match = matcher.group(1).replace(Strings.SPACE, Strings.URL_SPACE);
-								
+
 								images.add(match);
 								descriptionString = descriptionString.replace(match, new StringBuilder(Strings.FILEURL).append(FeedDataContentProvider.IMAGEFOLDER).append(Strings.IMAGEID_REPLACEMENT).append(match.substring(match.lastIndexOf('/')+1)).toString());
 							}
 						}
-						values.put(FeedData.EntryColumns.ABSTRACT, descriptionString); 
+						values.put(FeedData.EntryColumns.ABSTRACT, descriptionString);
 					}
 				}
-				
+
 				String enclosureString = null;
-				
+
 				StringBuilder existanceStringBuilder = new StringBuilder(FeedData.EntryColumns.LINK).append(Strings.DB_ARG);
-				
+
 				if (enclosure != null && enclosure.length() > 0) {
 					enclosureString = enclosure.toString();
 					values.put(FeedData.EntryColumns.ENCLOSURE, enclosureString);
 					existanceStringBuilder.append(Strings.DB_AND).append(FeedData.EntryColumns.ENCLOSURE).append(Strings.DB_ARG);
 				}
-				
+
 				String guidString = null;
-				
+
 				if (guid != null && guid.length() > 0) {
 					guidString = guid.toString();
 					values.put(FeedData.EntryColumns.GUID, guidString);
 					existanceStringBuilder.append(Strings.DB_AND).append(FeedData.EntryColumns.GUID).append(Strings.DB_ARG);
 				}
-				
+
 				String entryLinkString = Strings.EMPTY; // don't set this to null as we need *some* value
-				
+
 				if (entryLink != null &&  entryLink.length() > 0) {
 					entryLinkString = entryLink.toString().trim();
 					if (feedBaseUrl != null && !entryLinkString.startsWith(Strings.HTTP) && !entryLinkString.startsWith(Strings.HTTPS)) {
 						entryLinkString = feedBaseUrl + (entryLinkString.startsWith(Strings.SLASH) ? entryLinkString : Strings.SLASH + entryLinkString);
 					}
 				}
-				
+
 				String[] existanceValues = enclosureString != null ? (guidString != null ? new String[] {entryLinkString, enclosureString, guidString}: new String[] {entryLinkString, enclosureString}) : (guidString != null ? new String[] {entryLinkString, guidString} : new String[] {entryLinkString});
-				
+
 				boolean skip = false;
-				
-				if (!efficientFeedParsing) {
-					if (context.getContentResolver().update(feedEntiresUri, values, existanceStringBuilder.toString()+" AND "+FeedData.EntryColumns.DATE+"<"+entryDate.getTime(), existanceValues) == 1) {
-						newCount++;
-						skip = true;
-					} else {
-						values.remove(FeedData.EntryColumns.READDATE);
-						// continue with the standard procedure but don't reset the read-date
-					}
-				}
-				
+
+                if (context.getContentResolver().update(feedEntiresUri, values, existanceStringBuilder.toString()+" AND "+FeedData.EntryColumns.DATE+"<"+entryDate.getTime(), existanceValues) == 1) {
+                    newCount++;
+                    skip = true;
+                } else {
+                    values.remove(FeedData.EntryColumns.READDATE);
+                    // continue with the standard procedure but don't reset the read-date
+                }
+
 				if (!skip && ((entryLinkString.length() == 0 && guidString == null) || context.getContentResolver().update(feedEntiresUri, values, existanceStringBuilder.toString(), existanceValues) == 0)) {
 					values.put(FeedData.EntryColumns.LINK, entryLinkString);
 					if (entryDate == null) {
 						values.put(FeedData.EntryColumns.DATE, now--);
 					}
-					
+
 					String entryId = context.getContentResolver().insert(feedEntiresUri, values).getLastPathSegment();
-					
+
 					if (fetchImages) {
 						FeedDataContentProvider.IMAGEFOLDER_FILE.mkdir(); // create images dir
 						for (int n = 0, i = images != null ? images.size() : 0; n < i; n++) {
 							try {
 								String match = images.get(n);
-								
+
 								byte[] data = FetcherService.getBytes(new URL(images.get(n)).openStream());
-								
+
 								FileOutputStream fos = new FileOutputStream(new StringBuilder(FeedDataContentProvider.IMAGEFOLDER).append(entryId).append(Strings.IMAGEFILE_IDSEPARATOR).append(match.substring(match.lastIndexOf('/')+1)).toString());
-								
+
 								fos.write(data);
 								fos.close();
 							} catch (Exception e) {
@@ -527,13 +522,11 @@ public class RSSHandler extends DefaultHandler {
 							}
 						}
 					}
-					
+
 					newCount++;
-				} else if (entryDate == null && efficientFeedParsing) {
+				} else if (entryDate == null) {
 					cancel();
 				}
-			} else if (efficientFeedParsing) {
-				cancel();
 			}
 			description = null;
 			title = null;
@@ -633,8 +626,4 @@ public class RSSHandler extends DefaultHandler {
 		}
 	}
 
-	public void setEfficientFeedParsing(boolean efficientFeedParsing) {
-		this.efficientFeedParsing = efficientFeedParsing;
-	}
-	
 }

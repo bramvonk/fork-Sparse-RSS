@@ -89,38 +89,7 @@ public class ApplicationPreferencesActivity extends PreferenceActivity {
 				return true;
 			}
 		});
-		
-		preference = (Preference) findPreference(Strings.SETTINGS_EFFICIENTFEEDPARSING);
-		preference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-			public boolean onPreferenceChange(final Preference preference, Object newValue) {
-				if (newValue.equals(Boolean.FALSE)) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(ApplicationPreferencesActivity.this);
-					
-					builder.setIcon(android.R.drawable.ic_dialog_alert);
-					builder.setTitle(android.R.string.dialog_alert_title);
-					builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							Editor editor = PreferenceManager.getDefaultSharedPreferences(ApplicationPreferencesActivity.this).edit();
-							
-							editor.putBoolean(Strings.SETTINGS_EFFICIENTFEEDPARSING, Boolean.FALSE);
-							editor.commit();
-							((CheckBoxPreference) preference).setChecked(false);
-							dialog.dismiss();
-						}
-					});
-					builder.setNegativeButton(android.R.string.cancel, new OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					});
-					builder.setMessage(R.string.warning_moretraffic);
-					builder.show();
-					return false;
-				} else {
-					return true;
-				}
-			}
-		});
+
 	}
 	
 }
